@@ -12,6 +12,7 @@ app = FastAPI()
 p_frame = 0
 stream_thread_started = False
 cap = None
+last_uri = ""
     
 def putFPS(frame, fps):
     """
@@ -26,11 +27,13 @@ def gen(camera : Camera):
     global cap
     global p_frame
     global stream_thread_started
+    global last_uri
 
-    if not stream_thread_started or cap == None:
+    if not stream_thread_started or last_uri != camera.uri or cap == None:
         cap = GetVideo(camera.uri)
         cap.start()
         stream_thread_started = True
+        last_uri = camera.uri
     
     while True:
         try:
@@ -42,7 +45,7 @@ def gen(camera : Camera):
             yield (b'--frame\r\n'
                 b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
             p_frame = c_frame
-            print(round(f_rate))
+            # print(round(f_rate))
         except Exception as ex:
             print(ex)
             cap.stop()

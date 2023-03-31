@@ -1,3 +1,4 @@
+import numpy as np
 import cv2
 import threading
 class GetVideo:
@@ -10,8 +11,7 @@ class GetVideo:
         configFile = "deploy.prototxt.txt"
         self.net = cv2.dnn.readNetFromCaffe(configFile, modelFile)
         self.conf_threshold = 0.5
-        self.frame_layer = None
-
+        self.frame_layer = np.array([])
     
     def gray_scale(self):
         self.frame_layer = cv2.cvtColor(self.frame, cv2.COLOR_BGR2GRAY)
@@ -19,7 +19,7 @@ class GetVideo:
     def run_face_detection(self,model : str) -> list:
         if model == "hc":
             self.gray_scale()
-            return self.detector.detectMultiScale(self.frame_layer if self.frame_layer else self.frame,1.3,5)
+            return self.detector.detectMultiScale(self.frame_layer if np.any(self.frame_layer) else self.frame ,1.3,5)
         elif model == "cvdnn":
             blob = cv2.dnn.blobFromImage(self.frame, 1.0, (300, 300), [104, 117, 123], False, False)
             self.net.setInput(blob)
